@@ -13,7 +13,7 @@
   "scripts": {
     "start": "parcel",
     "build": "parcel build",
-    "predeploy": "rm -rf dist && parcel build src/index.html --public-url https://averyburke.github.io/G(PU)ameOfLife/",
+    "predeploy": "rm -rf dist && parcel build src/index.html --public-url https://averyburke.github.io/GPUameOfLife/",
     "deploy": "gh-pages -d dist"
   },
   "devDependencies": {

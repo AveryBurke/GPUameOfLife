@@ -8,4 +8,4 @@ You will need [yarn](https://yarnpkg.com/) installed. You also need [Chrome 10.1
 
 ## Usage
 
-Start the app server with `yarn start`, then go to http://localhost:1234/ in your browser. The grid is randomly seeded on each refresh. You can change the state of a cell by clicking ont it, or your can change the state of a number of cells by holding down your mouse button and moving the mouse accross the grid. More functionality to come.
+Start the app server with `yarn start`, then go to http://localhost:1234/ in your browser. The grid is randomly seeded on each refresh. You can change the state of a cell by clicking on it, or your can change the state of a number of cells by holding down your mouse button and moving the mouse accross the grid. More functionality to come.
