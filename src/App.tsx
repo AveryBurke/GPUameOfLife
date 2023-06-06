@@ -1,5 +1,5 @@
-async function app() {
-    const canvas = document.querySelector("canvas");
+import React, { useEffect, useRef } from "react";
+async function app(canvas:HTMLCanvasElement) {
     
     //@ts-ignore
     if (!navigator.gpu) {
@@ -383,4 +383,16 @@ device.queue.writeBuffer(cellStateStorage[0], 0, cellStateArray);
     setInterval(updateGrid, updateInterval);
     // updateGrid()
 }
-app()
+const App = () => {
+    const refCanvas = useRef(null)
+
+    useEffect(() => {
+        if (refCanvas.current){
+            app(refCanvas.current)
+        }
+    },[])
+
+    return (<div className="container"><canvas ref = {refCanvas} width="512" height="512"></canvas></div>)
+}
+
+export default App
