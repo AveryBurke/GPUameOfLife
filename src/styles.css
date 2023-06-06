@@ -10,3 +10,11 @@ html, body {
     align-items: center;
     justify-content: center;
 }
+.controlePanelContainer{
+  opacity: .8;
+    position: absolute;
+    padding: .25em .5em .25em .5em;
+    bottom: 512px;
+    background-color: antiquewhite;
+    right: 512px;
+}

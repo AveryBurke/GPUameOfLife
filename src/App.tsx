@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import ControlPanel from "./ControlPanel";
 async function app(canvas:HTMLCanvasElement) {
     
     //@ts-ignore
@@ -392,7 +393,11 @@ const App = () => {
         }
     },[])
 
-    return (<div className="container"><canvas ref = {refCanvas} width="512" height="512"></canvas></div>)
+    return (
+    <div className="container">
+     <ControlPanel />
+        <canvas ref = {refCanvas} width="512" height="512" />
+    </div>)
 }
 
 export default App

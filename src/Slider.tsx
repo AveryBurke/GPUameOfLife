@@ -12,24 +12,32 @@ const Slider = (
     max:number,
     value:number,
     label:string,
-    onChange:any,
+    onChange:(value: number) => void,
 }
 ) => {
     const [sliderValue, setSliderValue] = useState(value)
+    const [mouseState, setMouseState] = useState<"up" | "down">('up')
     useEffect(() => {
-        setSliderValue(value)
-    }, [value])
+      setSliderValue(value)
+    },[value])
+    useEffect(() => {
+        if (mouseState === 'up'){
+          onChange(sliderValue)
+        }
+    }, [mouseState])
+
     return (
         <div className="slider">
-          <div>label</div>
           <input
             min={min}
             max={max}
             type="range"
-            value={value}
+            value={sliderValue}
             className={`slider`}
             id = {`${label}_slider`}
-            onChange={onChange}
+            onChange={e => setSliderValue(+e.target.value)}
+            onMouseDown={() => setMouseState('down')}
+            onMouseUp={() => setMouseState('up')}
           />
         </div>
       );
