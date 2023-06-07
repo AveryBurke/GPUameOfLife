@@ -1,20 +1,54 @@
 html, body {
-    margin: 0;       /* remove the default margin          */
-    height: 100%;    /* make the html,body fill the page   */
+    margin: 0;
+    height: 100%;
     background-color: #FAF9F6;
   }
 .container {
     width: 100vw;
     height: 100vh;
     display:flex;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
 }
 .controlePanelContainer{
-  opacity: .8;
-    position: absolute;
-    padding: .25em .5em .25em .5em;
-    bottom: 512px;
-    background-color: antiquewhite;
-    right: 512px;
+  z-index: 1;
+  width: 15%;
+  opacity: .9;
+  position: absolute;
+  padding: .25em 1em .25em 1em;
+  bottom: 512px;
+  background-color: #faebd7;
+  right: 512px;
 }
+.slider-wrapper{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.slider-parent{
+  width: 100%;
+  cursor: ew-resize;
+  transition: all 200 ease;
+  margin: .25em .15em .25em .15em;
+}
+.slider{
+  z-index: 2;
+  width: 100%;
+  height: 1em;
+  background-color: #D7FAEB; 
+}
+.number{
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #EBD7FA;
+  border-radius: 10%;
+  border-style: solid;
+  padding:.05rem;
+  width: 4rem;
+}
+

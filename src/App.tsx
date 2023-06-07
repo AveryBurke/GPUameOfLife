@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ControlPanel from "./ControlPanel";
-async function app(canvas:HTMLCanvasElement) {
-    
+async function app(canvas: HTMLCanvasElement) {
+
     //@ts-ignore
     if (!navigator.gpu) {
         throw new Error("WebGPU not supported on this browser.");
@@ -20,10 +20,9 @@ async function app(canvas:HTMLCanvasElement) {
         format: canvasFormat,
     });
 
-    const gridSize = 64
     const workGroupSize = 8
+    const gridSize = 64
 
-    
 
     const vertices = new Float32Array([
         //   X,    Y,
@@ -50,7 +49,7 @@ async function app(canvas:HTMLCanvasElement) {
         usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
     });
 
-   
+
     device.queue.writeBuffer(vertexBuffer, /*bufferOffset=*/0, vertices);
 
     // Create an array representing the active state of each cell.
@@ -75,46 +74,46 @@ async function app(canvas:HTMLCanvasElement) {
         })
     ];
 
-// Set each cell to a random state, then copy the JavaScript array 
-// into the storage buffer.
-for (let i = 0; i < cellStateArray.length; ++i) {
-    cellStateArray[i] = Math.random() > 0.9 ? 1 : 0;
-  }
-let prevX = 0,
-    prevY = 0
-const paint = (event: MouseEvent, canvas:HTMLCanvasElement) => {
-    const {offsetX, offsetY} = event
-    if (prevX !== offsetX && prevY !== offsetY){
-        prevX = offsetX
-        prevY = offsetY
-        const squareSize = canvas.height / gridSize
-        const xCoord = Math.ceil(offsetX / squareSize) - 1
-        const yCoord = gridSize - Math.ceil(offsetY / squareSize)
-        const index = yCoord * gridSize + xCoord
-        indexArray[index] ^= 1
-        // updateGrid()
-        // indexArray = new Uint32Array(gridSize * gridSize)
+    // Set each cell to a random state, then copy the JavaScript array 
+    // into the storage buffer.
+    for (let i = 0; i < cellStateArray.length; ++i) {
+        cellStateArray[i] = Math.random() > 0.9 ? 1 : 0;
     }
-}
-let indexArray = new Uint32Array(gridSize * gridSize)
-let mouseDown = false
-canvas?.addEventListener('click', (event) => {
-    if (canvas){
-        paint(event, canvas)
+    let prevX = 0,
+        prevY = 0
+    const paint = (event: MouseEvent, canvas: HTMLCanvasElement) => {
+        const { offsetX, offsetY } = event
+        if (prevX !== offsetX && prevY !== offsetY) {
+            prevX = offsetX
+            prevY = offsetY
+            const squareSize = canvas.height / gridSize
+            const xCoord = Math.ceil(offsetX / squareSize) - 1
+            const yCoord = gridSize - Math.ceil(offsetY / squareSize)
+            const index = yCoord * gridSize + xCoord
+            indexArray[index] ^= 1
+            // updateGrid()
+            // indexArray = new Uint32Array(gridSize * gridSize)
+        }
     }
-})
-canvas?.addEventListener('mousedown', (event) => {
-    mouseDown = true
-})
-canvas?.addEventListener('mouseup', () => {
-    mouseDown = false
-})
-canvas?.addEventListener('mousemove', (event) => {
-   if (canvas && mouseDown){
-        paint(event, canvas)
-   }
-})
-device.queue.writeBuffer(cellStateStorage[0], 0, cellStateArray);
+    let indexArray = new Uint32Array(gridSize * gridSize)
+    let mouseDown = false
+    canvas?.addEventListener('click', (event) => {
+        if (canvas) {
+            paint(event, canvas)
+        }
+    })
+    canvas?.addEventListener('mousedown', (event) => {
+        mouseDown = true
+    })
+    canvas?.addEventListener('mouseup', () => {
+        mouseDown = false
+    })
+    canvas?.addEventListener('mousemove', (event) => {
+        if (canvas && mouseDown) {
+            paint(event, canvas)
+        }
+    })
+    device.queue.writeBuffer(cellStateStorage[0], 0, cellStateArray);
 
     // // Mark every other cell of the second grid as active.
     // for (let i = 0; i < cellStateArray.length; i++) {
@@ -232,7 +231,7 @@ device.queue.writeBuffer(cellStateStorage[0], 0, cellStateArray);
             binding: 2,
             visibility: GPUShaderStage.COMPUTE,
             buffer: { type: "storage" } // Cell state output buffer
-        }, 
+        },
         {
             binding: 3,
             visibility: GPUShaderStage.COMPUTE,
@@ -334,7 +333,7 @@ device.queue.writeBuffer(cellStateStorage[0], 0, cellStateArray);
             You can then submit that command buffer to have WebGPU execute the commands.
         */
 
-       
+
 
 
         device.queue.writeBuffer(cellStateStorage[2], 0, indexArray);
@@ -370,34 +369,78 @@ device.queue.writeBuffer(cellStateStorage[0], 0, cellStateArray);
 
         // End the render pass and submit the command buffer
         pass.end();
-         /**
-         * It’s important to emphasize that all of these functions we called like setPipeline, 
-         * and draw only add commands to a command buffer. 
-         * They don’t actually execute the commands. 
-         * The commands are executed when we submit the command buffer to the device queue
-         */
+        /**
+        * It’s important to emphasize that all of these functions we called like setPipeline, 
+        * and draw only add commands to a command buffer. 
+        * They don’t actually execute the commands. 
+        * The commands are executed when we submit the command buffer to the device queue
+        */
         device.queue.submit([encoder.finish()]);
     }
 
     // Schedule updateGrid() to run repeatedly
-    
+
     setInterval(updateGrid, updateInterval);
     // updateGrid()
 }
 const App = () => {
+
     const refCanvas = useRef(null)
 
-    useEffect(() => {
-        if (refCanvas.current){
-            app(refCanvas.current)
-        }
+    const [width, setWidth] = useState(512)
+    const [height, setHeight] = useState(512)
+    const [timeStep, settimeStep] = useState(1)
+
+    const onTimeStepChange = useCallback((step: number) => {
+        settimeStep(step)
+    }, []) 
+
+    const onHeightChange = useCallback((height: number) => {
+        setHeight(height)
+    }, [])
+
+    const onWidthChange = useCallback((width:number) => {
+        setWidth(width)
     },[])
 
+    // const timeStepSliderProps = useMemo(() => ({
+    //     value: timeStep,
+    //     max: 1,
+    //     min: 60,
+    //     onChange: onTimeStepChange,
+    //     label: "step"
+    // }), [timeStep])
+
+    const heightSliderProps = useMemo(() => ({
+        value: height,
+        max: 1024,
+        min: 16,
+        step:16,
+        onChange: onHeightChange,
+        label: "height"
+    }), [height])
+
+    const widthSliderProps = useMemo(() => ({
+        value: width,
+        max: 1024,
+        min: 16,
+        step:16,
+        onChange: onWidthChange,
+        label: "width"
+    }), [width])
+
+    useEffect(() => {
+        if (refCanvas.current) {
+            app(refCanvas.current)
+        }
+    }, [])
+
+    const controlePanelProps = {sliderProps:[widthSliderProps, heightSliderProps]}
     return (
-    <div className="container">
-     <ControlPanel />
-        <canvas ref = {refCanvas} width="512" height="512" />
-    </div>)
+        <div className="container">
+            <ControlPanel {...controlePanelProps} />
+            <canvas ref={refCanvas} width={width} height={height} />
+        </div>)
 }
 
 export default App

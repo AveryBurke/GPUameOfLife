@@ -1,27 +1,23 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, Fragment } from "react";
 import Slider from './Slider'
 
-const ControlPanel = () => {
-    const [gridSize, setGridSize] = useState(10)
+type SliderProps = {
+    value: number,
+    label: string,
+    min: number,
+    max: number,
+    step:number,
+    onChange: (input: number) => void
+}
 
-    const gridChange = useCallback((gridSize:number) =>{
-        setGridSize(gridSize)
-    },[])
+const ControlPanel = ({sliderProps}:{sliderProps:SliderProps[]}) => {
 
-    const gridSliderProps = useMemo(() => ({
-        value: gridSize,
-        max: 100,
-        min: 4,
-        onChange: gridChange,
-        label: "grid size"
-    }), [gridSize])
-
+    const sliders = sliderProps.map((sliderProp, i) => <Slider key = {`${i}_slider`} {...sliderProp}/>)
 
 
     return (
         <div className="controlePanelContainer">
-            <div>grid size: {gridSize} by {gridSize} </div>
-            <Slider {...gridSliderProps} />
+            {sliders}
         </div>)
 }
 
