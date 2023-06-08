@@ -20,8 +20,9 @@ async function app(canvas: HTMLCanvasElement) {
         format: canvasFormat,
     });
 
-    const workGroupSize = 8
-    const gridSize = 64
+    const workGroupSize = 16
+    const gridWidth = 208
+    const gridHeight = 208
 
 
     const vertices = new Float32Array([
@@ -35,7 +36,7 @@ async function app(canvas: HTMLCanvasElement) {
         -0.8, 0.8,
     ]);
 
-    const uniformArray = new Float32Array([gridSize, gridSize])
+    const uniformArray = new Float32Array([gridWidth, gridHeight])
     const uniformBuffer = device.createBuffer({
         label: "Grid Uniforms",
         size: uniformArray.byteLength,
@@ -53,7 +54,7 @@ async function app(canvas: HTMLCanvasElement) {
     device.queue.writeBuffer(vertexBuffer, /*bufferOffset=*/0, vertices);
 
     // Create an array representing the active state of each cell.
-    const cellStateArray = new Uint32Array(gridSize * gridSize);
+    const cellStateArray = new Uint32Array(gridWidth * gridHeight);
 
     // Create a storage buffer to hold the cell state.
     const cellStateStorage = [
@@ -83,19 +84,18 @@ async function app(canvas: HTMLCanvasElement) {
         prevY = 0
     const paint = (event: MouseEvent, canvas: HTMLCanvasElement) => {
         const { offsetX, offsetY } = event
-        if (prevX !== offsetX && prevY !== offsetY) {
-            prevX = offsetX
-            prevY = offsetY
-            const squareSize = canvas.height / gridSize
-            const xCoord = Math.ceil(offsetX / squareSize) - 1
-            const yCoord = gridSize - Math.ceil(offsetY / squareSize)
-            const index = yCoord * gridSize + xCoord
+        const [adjustX, adjustY] = [offsetX * window.devicePixelRatio, offsetY * window.devicePixelRatio]
+        if (prevX !== adjustX && prevY !== adjustY) {
+            prevX = adjustX
+            prevY = adjustY
+            const squareSize = canvas.height / gridHeight
+            const xCoord = Math.ceil((adjustX) / squareSize) - 1
+            const yCoord = gridHeight - Math.ceil((adjustY) / squareSize)
+            const index = yCoord * gridWidth + xCoord
             indexArray[index] ^= 1
-            // updateGrid()
-            // indexArray = new Uint32Array(gridSize * gridSize)
         }
     }
-    let indexArray = new Uint32Array(gridSize * gridSize)
+    let indexArray = new Uint32Array(gridWidth * gridHeight)
     let mouseDown = false
     canvas?.addEventListener('click', (event) => {
         if (canvas) {
@@ -204,7 +204,14 @@ async function app(canvas: HTMLCanvasElement) {
                 let cellOffset = cell / grid * 2;
                 let gridPos = (input.pos*state+1) / grid - 1 + cellOffset;
                 var output:VertexOutput;
-                output.pos = vec4(gridPos, 0, 1);
+                var modify = vec2(1.0, 1.0);
+                if (grid.y < grid.x){
+                    modify = vec2(1.0, (grid.y / grid.x));
+                }
+                if (grid.x < grid.y){
+                    modify = vec2(grid.x / grid.y, 1.0);
+                }
+                output.pos = vec4(gridPos * modify, 0, 1);
                 output.cell = cell;
                 return output;
             }
@@ -343,9 +350,9 @@ async function app(canvas: HTMLCanvasElement) {
 
         computePass.setPipeline(simulationPipeline);
         computePass.setBindGroup(0, bindGroups[step % 2]);
-        computePass.dispatchWorkgroups(Math.ceil(gridSize / workGroupSize), Math.ceil(gridSize / workGroupSize));
+        computePass.dispatchWorkgroups(Math.ceil(gridWidth / workGroupSize), Math.ceil(gridHeight / workGroupSize));
         computePass.end();
-        indexArray = new Uint32Array(gridSize * gridSize)
+        indexArray = new Uint32Array(gridWidth * gridHeight)
 
         step++; // Increment the step count
 
@@ -365,7 +372,7 @@ async function app(canvas: HTMLCanvasElement) {
         //some logic goes here
         pass.setBindGroup(0, bindGroups[step % 2]);
         pass.setVertexBuffer(0, vertexBuffer);
-        pass.draw(vertices.length / 2, gridSize * gridSize);
+        pass.draw(vertices.length / 2, gridWidth * gridHeight);
 
         // End the render pass and submit the command buffer
         pass.end();
@@ -384,11 +391,12 @@ async function app(canvas: HTMLCanvasElement) {
     // updateGrid()
 }
 const App = () => {
-
+    const ratio = window.devicePixelRatio
     const refCanvas = useRef(null)
+    const refFunction = useRef<((canvas:HTMLCanvasElement) => Promise<void>) | null>(null)
 
-    const [width, setWidth] = useState(512)
-    const [height, setHeight] = useState(512)
+    const [width, setWidth] = useState(16)
+    const [height, setHeight] = useState(16)
     const [timeStep, settimeStep] = useState(1)
 
     const onTimeStepChange = useCallback((step: number) => {
@@ -402,6 +410,9 @@ const App = () => {
     const onWidthChange = useCallback((width:number) => {
         setWidth(width)
     },[])
+    // useCallback(() => {
+    //     if (refCanvas.current) app(refCanvas.current)
+    // },[width])
 
     // const timeStepSliderProps = useMemo(() => ({
     //     value: timeStep,
@@ -431,15 +442,20 @@ const App = () => {
 
     useEffect(() => {
         if (refCanvas.current) {
-            app(refCanvas.current)
+            refFunction.current = app
+            refFunction.current(refCanvas.current)
         }
     }, [])
 
+    useCallback(() => {
+        if(refCanvas.current && refFunction.current) refFunction.current(refCanvas.current)
+    }, [width])
+
     const controlePanelProps = {sliderProps:[widthSliderProps, heightSliderProps]}
-    return (
+    return (    
         <div className="container">
             <ControlPanel {...controlePanelProps} />
-            <canvas ref={refCanvas} width={width} height={height} />
+            <canvas ref={refCanvas} width={600 * ratio} height={600 * ratio} style={{width:`${600}px`,height:`${600}px`}} />
         </div>)
 }
 
