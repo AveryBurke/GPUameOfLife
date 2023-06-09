@@ -31,8 +31,12 @@ html, body {
 .slider-parent{
   width: 100%;
   cursor: ew-resize;
-  transition: all 200 ease;
+  transition: width 250 linear;
+  transition: background-color 300 linear;
   margin: .25em .15em .25em .15em;
+}
+.slider-parent:hover{
+  background-color: #d7e6fa;
 }
 .slider{
   z-index: 2;
