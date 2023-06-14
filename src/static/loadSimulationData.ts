@@ -8,7 +8,6 @@ export default function loadSimulationData(
         vertices,
         gridWidth,
         gridHeight,
-        canvas,
         canvasFormat,
         renderFun }:
         {
@@ -17,7 +16,6 @@ export default function loadSimulationData(
             vertices: Float32Array,
             gridWidth: number,
             gridHeight: number,
-            canvas: HTMLCanvasElement
             canvasFormat: any
             renderFun: any
         }) {
@@ -65,39 +63,7 @@ export default function loadSimulationData(
     for (let i = 0; i < cellStateArray.length; ++i) {
         cellStateArray[i] = Math.random() > 0.9 ? 1 : 0;
     }
-    let prevX = 0,
-        prevY = 0
-    const paint = (event: MouseEvent, canvas: HTMLCanvasElement) => {
-        const { offsetX, offsetY } = event
-        const [adjustX, adjustY] = [offsetX * window.devicePixelRatio, offsetY * window.devicePixelRatio]
-        if (prevX !== adjustX && prevY !== adjustY) {
-            prevX = adjustX
-            prevY = adjustY
-            const squareSize = canvas.height / gridHeight
-            const xCoord = Math.ceil((adjustX) / squareSize) - 1
-            const yCoord = gridHeight - Math.ceil((adjustY) / squareSize)
-            const index = yCoord * gridWidth + xCoord
-            indexArray[index] ^= 1
-        }
-    }
-    let indexArray = new Uint32Array(gridWidth * gridHeight)
-    let mouseDown = false
-    canvas.addEventListener('click', (event) => {
-        if (canvas) {
-            paint(event, canvas)
-        }
-    })
-    canvas.addEventListener('mousedown', (event) => {
-        mouseDown = true
-    })
-    canvas.addEventListener('mouseup', () => {
-        mouseDown = false
-    })
-    canvas.addEventListener('mousemove', (event) => {
-        if (canvas && mouseDown) {
-            paint(event, canvas)
-        }
-    })
+    
     device.queue.writeBuffer(cellStateStorage[0], 0, cellStateArray);
     device.queue.writeBuffer(cellStateStorage[1], 0, cellStateArray);
 
@@ -218,7 +184,6 @@ export default function loadSimulationData(
     return renderFun({
         device,
         cellStateStorage,
-        indexArray,
         simulationPipeline,
         bindGroups,
         workGroupSize,

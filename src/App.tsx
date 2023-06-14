@@ -1,9 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import ControlPanel from "./ControlPanel";
 import GOL from "./GOL";
 
 const App = () => {
-    async function fetchDAndA() {
+    async function fetchD() {
         //@ts-check
         const adapter = await navigator.gpu.requestAdapter();
         if (!adapter) {
@@ -11,23 +11,28 @@ const App = () => {
         }
 
         const device = await adapter.requestDevice();
-        return [adapter, device]
+        return [device]
 
     }
-    const fetchDeviceAndAdapter = useCallback(async () => {
-        const [adapter, device] = await fetchDAndA()
-        return [adapter, device]
+    const fetchDevice = useCallback(async () => {
+        const [device] = await fetchD()
+        return [device]
     }, [])
 
 
     const [width, setWidth] = useState(48)
     const [height, setHeight] = useState(48)
+    const [interval, setInterval] = useState(200)
     const onHeightChange = useCallback((height: number) => {
         setHeight(height)
     }, [])
 
     const onWidthChange = useCallback((width: number) => {
         setWidth(width)
+    }, [])
+
+    const onIntervalChange = useCallback((interval:number) =>{
+        setInterval(interval)
     }, [])
 
     const heightSliderProps = useMemo(() => ({
@@ -48,13 +53,23 @@ const App = () => {
         label: "width"
     }), [width])
 
-    const GOLprops = useMemo(() => ({
-        fetchDeviceAndAdapter,
-        width,
-        height
-    }),[width,height])
+    const intervalSliderProps = useMemo(() => ({
+        value: interval,
+        max: 1000,
+        min: 20,
+        step: 20,
+        onChange: onIntervalChange,
+        label: "ms"
+    }),[interval])
 
-    const controlePanelProps = { sliderProps: [widthSliderProps, heightSliderProps] }
+    const GOLprops = useMemo(() => ({
+        fetchDevice,
+        width,
+        height,
+        interval
+    }),[width, height, interval])
+
+    const controlePanelProps = { sliderProps: [intervalSliderProps, widthSliderProps, heightSliderProps] }
     return (<div className="container">
         <ControlPanel {...controlePanelProps} />
         <GOL {...GOLprops} />

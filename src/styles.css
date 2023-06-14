@@ -12,6 +12,7 @@ html, body {
     justify-content: center;
 }
 .controlePanelContainer{
+  font-family:monospace;
   z-index: 1;
   width: 15%;
   opacity: .9;
@@ -26,6 +27,7 @@ html, body {
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  margin: .05rem;
 }
 
 .slider-parent{
@@ -33,7 +35,7 @@ html, body {
   cursor: ew-resize;
   transition: width 250 linear;
   transition: background-color 300 linear;
-  margin: .25em .15em .25em .15em;
+  margin: 0 .15rem;
 }
 .slider-parent:hover{
   background-color: #d7e6fa;
@@ -45,14 +47,15 @@ html, body {
   background-color: #D7FAEB; 
 }
 .number{
-  text-align: center;
+  font-family: monospace;
+  text-align: left;
   display: flex;
   justify-content: center;
   align-items: center;
   background-color: #EBD7FA;
-  border-radius: 10%;
+  border-radius: 5%;
   border-style: solid;
-  padding:.05rem;
+  padding:.05rem .25rem;
   width: 4rem;
 }
 

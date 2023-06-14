@@ -1,7 +1,6 @@
 export default function updateGrid({
     device,
     cellStateStorage,
-    indexArray,
     simulationPipeline,
     bindGroups,
     workGroupSize,
@@ -12,7 +11,7 @@ export default function updateGrid({
     vertices,
     step
 }) {
-    return function simulation(context: any) {
+    return function simulation(context: any, indexArray:Uint32Array) {
         /*  
         Command buffers are a buffer of commands. You create encoders. 
         The encoders encode commands into the command buffer. 
@@ -29,10 +28,7 @@ export default function updateGrid({
         computePass.setBindGroup(0, bindGroups[step % 2]);
         computePass.dispatchWorkgroups(Math.ceil(gridWidth / workGroupSize), Math.ceil(gridHeight / workGroupSize));
         computePass.end();
-        indexArray = new Uint32Array(gridWidth * gridHeight)
-
         step++; // Increment the step count
-
         // Start a render pass 
 
         const pass = encoder.beginRenderPass({
