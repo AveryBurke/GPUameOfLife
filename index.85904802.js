@@ -27629,6 +27629,7 @@ const GOL = ({ fetchDevice , width , height , interval  })=>{
     const [inputArray, setInputArray] = (0, _react.useState)(new Uint32Array(width * height));
     const refCanvas = (0, _react.useRef)(null);
     const refCtx = (0, _react.useRef)(null);
+    const [inputArrayHasChanged, setHasChanged] = (0, _react.useState)(false);
     (0, _react.useEffect)(()=>{
         async function handleFetchDevice() {
             const [device] = await fetchDevice();
@@ -27655,7 +27656,9 @@ const GOL = ({ fetchDevice , width , height , interval  })=>{
         refCtx.current
     ]);
     const hanldePaint = (event, canvas)=>{
-        (0, _paintDefault.default)(event, canvas, width, height, inputArray, window.devicePixelRatio);
+        const offsetRatio = Math.min(width, height) / Math.max(width, height);
+        (0, _paintDefault.default)(event, canvas, width, height, inputArray, window.devicePixelRatio, offsetRatio);
+        setHasChanged(true);
     };
     //initilize the simulation, once the deivce is fetched and the context is configured
     (0, _react.useEffect)(()=>{
@@ -27693,11 +27696,18 @@ const GOL = ({ fetchDevice , width , height , interval  })=>{
         height
     ]);
     const sim = (0, _react.useCallback)(()=>{
-        if (typeof simulation === "function" && refCtx.current) simulation(refCtx.current, inputArray);
+        if (typeof simulation === "function" && refCtx.current) {
+            simulation(refCtx.current, inputArray);
+            if (inputArrayHasChanged) {
+                setInputArray(new Uint32Array(width * height));
+                setHasChanged(false);
+            }
+        }
     }, [
-        simulation
+        simulation,
+        inputArrayHasChanged
     ]);
-    (0, _useDynamicIntervalDefault.default)(()=>sim(), interval);
+    (0, _useDynamicIntervalDefault.default)(sim, interval);
     return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("canvas", {
         ref: refCanvas,
         onMouseMove: function(e) {
@@ -27719,11 +27729,11 @@ const GOL = ({ fetchDevice , width , height , interval  })=>{
         }
     }, void 0, false, {
         fileName: "src/GOL.tsx",
-        lineNumber: 81,
+        lineNumber: 88,
         columnNumber: 12
     }, undefined);
 };
-_s(GOL, "g2RgUXth4lPlEKiK7xLjUryENbc=", false, function() {
+_s(GOL, "w8FWQl3YptK+elpa2FBR0rm4CeY=", false, function() {
     return [
         (0, _useDynamicIntervalDefault.default)
     ];
@@ -27742,7 +27752,7 @@ $RefreshReg$(_c1, "%default%");
 },{"react/jsx-dev-runtime":"iTorj","react":"21dqq","./static/paint":"5zBqV","./static/loadSimulationData":"k1ehx","./static/renderGOL":"dVb7d","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","./hooks/useDynamicInterval":"60wlR"}],"5zBqV":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-const paint = (event, canvas, gridWidth, gridHeight, indexArray, devicePixelRatio)=>{
+const paint = (event, canvas, gridWidth, gridHeight, indexArray, devicePixelRatio, offsetRatio)=>{
     const { offsetX , offsetY  } = event;
     const [adjustX, adjustY] = [
         offsetX * devicePixelRatio,
