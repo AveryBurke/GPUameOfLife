@@ -1,0 +1,68 @@
+html, body {
+  height: 100%;
+  background-color: #006;
+  margin: 0;
+}
+
+.container {
+  width: 100vw;
+  height: 100vh;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+.controlePanelContainer {
+  z-index: 1;
+  width: 15%;
+  opacity: .9;
+  background-color: #faebd7;
+  padding: .25em 1em;
+  font-family: monospace;
+  position: absolute;
+  bottom: 512px;
+  right: 512px;
+}
+
+.slider-wrapper {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin: .05rem;
+  display: flex;
+}
+
+.slider-parent {
+  width: 100%;
+  cursor: ew-resize;
+  transition: width 250 linear;
+  transition: background-color 300 linear;
+  margin: 0 .15rem;
+}
+
+.slider-parent:hover {
+  background-color: #d7e6fa;
+}
+
+.slider {
+  z-index: 2;
+  width: 100%;
+  height: 1em;
+  background-color: #d7faeb;
+}
+
+.number {
+  text-align: left;
+  width: 4rem;
+  background-color: #ebd7fa;
+  border-style: solid;
+  border-radius: 5%;
+  justify-content: center;
+  align-items: center;
+  padding: .05rem .25rem;
+  font-family: monospace;
+  display: flex;
+}
+
+/*# sourceMappingURL=index.4d663569.css.map */
