@@ -24,6 +24,7 @@ const GOL = ({ fetchDevice, width, height, interval }: { fetchDevice: (() => Pro
     const [inputArray, setInputArray] = useState<Uint32Array>(new Uint32Array(width * height))
     const refCanvas = useRef<HTMLCanvasElement>(null)
     const refCtx = useRef<any>(null)
+    const [inputArrayHasChanged, setHasChanged] = useState(false)
 
     useEffect(() => {
         async function handleFetchDevice() {
@@ -51,7 +52,9 @@ const GOL = ({ fetchDevice, width, height, interval }: { fetchDevice: (() => Pro
     }, [device, refCtx.current])
 
     const hanldePaint = (event: MouseEvent, canvas: HTMLCanvasElement) => {
-        paint(event, canvas, width, height, inputArray, window.devicePixelRatio)
+        const offsetRatio = Math.min(width, height) / Math.max(width, height)
+        paint(event, canvas, width, height, inputArray, window.devicePixelRatio, offsetRatio)
+        setHasChanged(true)
     }
 
     //initilize the simulation, once the deivce is fetched and the context is configured
@@ -73,10 +76,14 @@ const GOL = ({ fetchDevice, width, height, interval }: { fetchDevice: (() => Pro
     const sim = useCallback(() => {
         if (typeof simulation === "function" && refCtx.current) {
             simulation(refCtx.current,inputArray)
+            if (inputArrayHasChanged){
+                setInputArray(new Uint32Array(width * height))
+                setHasChanged(false)
+            }
         }
-    },[simulation])
+    },[simulation, inputArrayHasChanged])
 
-    useDynamicInterval(() => sim(),interval)
+    useDynamicInterval(sim,interval)
 
     return <canvas
         ref={refCanvas}
