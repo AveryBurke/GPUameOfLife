@@ -17,7 +17,7 @@ export default function updateGrid({
         The encoders encode commands into the command buffer. 
         You then finish the encoder and it gives you the command buffer it created. 
         You can then submit that command buffer to have WebGPU execute the commands.
-    */
+        */
 
         device.queue.writeBuffer(cellStateStorage[2], 0, indexArray);
         const encoder = device.createCommandEncoder();

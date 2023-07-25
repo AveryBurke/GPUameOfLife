@@ -1,25 +1,11 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState, useContext } from "react";
 import ControlPanel from "./ControlPanel";
 import GOL from "./GOL";
+import {AsynContext} from "./contexts/Context";
 
 const App = () => {
-    async function fetchD() {
-        //@ts-check
-        const adapter = await navigator.gpu.requestAdapter();
-        if (!adapter) {
-            throw new Error("No appropriate GPUAdapter found.");
-        }
 
-        const device = await adapter.requestDevice();
-        return [device]
-
-    }
-    const fetchDevice = useCallback(async () => {
-        const [device] = await fetchD()
-        return [device]
-    }, [])
-
-
+    const {status} = useContext(AsynContext)
     const [width, setWidth] = useState(48)
     const [height, setHeight] = useState(48)
     const [interval, setInterval] = useState(200)
@@ -63,16 +49,16 @@ const App = () => {
     }),[interval])
 
     const GOLprops = useMemo(() => ({
-        fetchDevice,
         width,
         height,
         interval
     }),[width, height, interval])
 
     const controlePanelProps = { sliderProps: [intervalSliderProps, widthSliderProps, heightSliderProps] }
-    return (<div className="container">
+    return (
+    <div className="container">
         <ControlPanel {...controlePanelProps} />
-        <GOL {...GOLprops} />
+        {status === "complete" ? <GOL {...GOLprops} /> : <span>{status}</span>}
     </div>)
 }
 

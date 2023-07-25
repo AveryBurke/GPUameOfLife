@@ -1,11 +1,12 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback, useContext } from "react";
 import useDynamicInterval from "./hooks/useDynamicInterval";
 import paint from "./static/paint";
 import loadSimulationData from "./static/loadSimulationData";
 import renderGOL from "./static/renderGOL";
+import { AsynContext } from "./contexts/Context";
 
 const vertices = new Float32Array([
-    //   X,    Y,
+//   X,   Y,
     -0.8, -0.8,
     0.8, -0.8,
     0.8, 0.8,
@@ -15,9 +16,9 @@ const vertices = new Float32Array([
     -0.8, 0.8,
 ]);
 
-const GOL = ({ fetchDevice, width, height, interval }: { fetchDevice: (() => Promise<any[]>), width: number, height: number, interval: number }) => {
+const GOL = ({ width, height, interval }: {width: number, height: number, interval: number }) => {
+    const {device} = useContext(AsynContext)
     const ratio = window.devicePixelRatio
-    const [device, setDevice] = useState<any>(null)
     const [mouseState, setMouseState] = useState<"up" | "down">("up")
     const [ready, setReady] = useState(false)
     const [simulation, setSimulation] = useState<any>()
@@ -27,21 +28,13 @@ const GOL = ({ fetchDevice, width, height, interval }: { fetchDevice: (() => Pro
     const [inputArrayHasChanged, setHasChanged] = useState(false)
 
     useEffect(() => {
-        async function handleFetchDevice() {
-            const [device] = await fetchDevice()
-            setDevice(device)
-        }
-        handleFetchDevice()
-    }, [])
-
-    useEffect(() => {
         if (refCanvas.current && !refCtx.current) {
             refCtx.current = refCanvas.current.getContext("webgpu");
         }
     }, [refCanvas.current])
 
     useEffect(() => {
-        if (device && refCtx.current) {
+        if (refCtx.current) {
             const canvasFormat = navigator.gpu.getPreferredCanvasFormat();
             refCtx.current.configure({
                 device,
@@ -49,7 +42,7 @@ const GOL = ({ fetchDevice, width, height, interval }: { fetchDevice: (() => Pro
             });
             setReady(true);
         }
-    }, [device, refCtx.current])
+    }, [refCtx.current])
 
     const hanldePaint = (event: MouseEvent, canvas: HTMLCanvasElement) => {
         const offsetRatio = Math.min(width, height) / Math.max(width, height)
@@ -57,7 +50,7 @@ const GOL = ({ fetchDevice, width, height, interval }: { fetchDevice: (() => Pro
         setHasChanged(true)
     }
 
-    //initilize the simulation, once the deivce is fetched and the context is configured
+    //initilize the simulation
     useEffect(() => {
         if (ready && refCtx.current) {
             const simulation = loadSimulationData({ device, workGroupSize: 16, vertices, gridWidth: width, gridHeight: height, canvasFormat: navigator.gpu.getPreferredCanvasFormat(), renderFun: renderGOL })
@@ -95,6 +88,7 @@ const GOL = ({ fetchDevice, width, height, interval }: { fetchDevice: (() => Pro
         }}
         onClick={function (e) {
             const { nativeEvent, target } = e
+                console.log(nativeEvent.offsetX, nativeEvent.offsetY)
                 hanldePaint(nativeEvent, target as HTMLCanvasElement)
         }}
         onMouseDown={() => setMouseState('down')}

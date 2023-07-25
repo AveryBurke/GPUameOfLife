@@ -36,7 +36,7 @@ export default function loadSimulationData(
     });
 
 
-    device.queue.writeBuffer(vertexBuffer, /*bufferOffset=*/0, vertices);
+    device.queue.writeBuffer(vertexBuffer, 0, vertices);
 
     // Create an array representing the active state of each cell.
     const cellStateArray = new Uint32Array(gridWidth * gridHeight);
@@ -99,8 +99,7 @@ export default function loadSimulationData(
             binding: 3,
             visibility: GPUShaderStage.COMPUTE,
             buffer: { type: "read-only-storage" } // Cell state input buffer for user data
-        }
-        ]
+        }]
     });
 
     const bindGroups = [
